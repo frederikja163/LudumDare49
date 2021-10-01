@@ -3,10 +3,18 @@
     <PropertyGroup>
         <OutputType>Exe</OutputType>
         <TargetFramework>net5.0</TargetFramework>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     </PropertyGroup>
 
     <ItemGroup>
       <PackageReference Include="OpenTK" Version="5.0.0-pre.6" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Remove="Assets\basic.frag" />
+      <EmbeddedResource Include="Assets\basic.frag" />
+      <None Remove="Assets\basic.vert" />
+      <EmbeddedResource Include="Assets\basic.vert" />
     </ItemGroup>
 
 </Project>
