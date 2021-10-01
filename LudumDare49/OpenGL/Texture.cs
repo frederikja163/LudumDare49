@@ -34,8 +34,9 @@ namespace LudumDare49.OpenGL
             Unbind();
         }
 
-        public void Bind()
+        public void Bind(TextureUnit textureUnit = TextureUnit.Texture0)
         {
+            GL.ActiveTexture(textureUnit);
             GL.BindTexture(TextureTarget.Texture2d, _handle);
         }
 

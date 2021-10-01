@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Reflection;
@@ -10,7 +11,8 @@ namespace LudumDare49.OpenGL
     public sealed class Shader : IDisposable
     {
         private readonly ProgramHandle _handle;
-        
+        private Dictionary<string, int> _uniformLocations = new ();
+
         public Shader(string path)
         {
             using StreamReader vertStream = new StreamReader(Assets.LoadAsset(path + ".vert"));
@@ -62,15 +64,19 @@ namespace LudumDare49.OpenGL
             return GL.GetAttribLocation(_handle, name);
         }
 
-        public int GetUniformLocation(string name)
+        private int GetUniformLocation(string name)
         {
-            return GL.GetUniformLocation(_handle, name);
+            if (!_uniformLocations.TryGetValue(name, out int location))
+            {
+                location = GL.GetUniformLocation(_handle, name);
+            }
+            return location;
         }
 
-        public void SetUniform(int location, int value)
+        public void SetUniform(string name, int value)
         {
             Bind();
-            GL.Uniform1i(location, value);
+            GL.Uniform1i(GetUniformLocation(name), value);
             Unbind();
         }
 

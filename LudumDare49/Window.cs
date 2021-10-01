@@ -9,11 +9,7 @@ namespace LudumDare49
 {
     public sealed class Window : GameWindow
     {
-        private Buffer<float> _vbo;
-        private Buffer<uint> _ebo;
-        private VertexArray _vao;
-        private Shader _shader;
-        private Texture _texture;
+        private Entity3D _obj;
         
         public Window(GameWindowSettings gameWindowSettings, NativeWindowSettings nativeWindowSettings) : base(gameWindowSettings, nativeWindowSettings)
         {
@@ -22,38 +18,19 @@ namespace LudumDare49
         protected override void OnLoad()
         {
             base.OnLoad();
+            GL.Enable(EnableCap.DepthTest);
+            GL.DepthFunc(DepthFunction.Less);
 
-            _texture = new Texture("test.png");
-            _shader = new Shader("basic");
-            
-            _vbo = new Buffer<float>(BufferTargetARB.ArrayBuffer,
-                1f, 1f, 1f, 1f,
-                1f, -1f, 1f, 0f,
-                -1f, -1f, 0f, 0f,
-                -1f, 1f, 0f, 1f);
-            _ebo = new Buffer<uint>(BufferTargetARB.ElementArrayBuffer, 0, 1, 2, 0, 2, 3);
-            
-            _vao = new VertexArray();
-            _vao.SetIndexBuffer(_ebo);
-            _vao.AddVertexAttribute(_vbo, _shader.GetAttributeLocation("vPos"), 2, VertexAttribPointerType.Float, 4, 0);
-            _vao.AddVertexAttribute(_vbo, _shader.GetAttributeLocation("vTexCoord"), 2, VertexAttribPointerType.Float, 4, 2 * sizeof(float));
+            _obj = new Entity3D("models.obj", "coffinB");
             
             GL.ClearColor(Color4.Magenta);
         }
 
         public void Render()
         {
-            GL.Clear(ClearBufferMask.ColorBufferBit);
+            GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
             
-            _shader.Bind();
-            _vao.Bind();
-            _texture.Bind();
-            
-            GL.DrawElements(PrimitiveType.Triangles, 6, DrawElementsType.UnsignedInt, 0);
-            
-            _texture.Unbind();
-            _vao.Unbind();
-            _shader.Unbind();
+            _obj.Render();
             
             SwapBuffers();
         }
@@ -61,11 +38,6 @@ namespace LudumDare49
         protected override void OnUnload()
         {
             base.OnUnload();
-            
-            _vbo.Dispose();
-            _ebo.Dispose();
-            _vao.Dispose();
-            _shader.Dispose();
         }
 
         protected override void OnRenderFrame(FrameEventArgs args)
