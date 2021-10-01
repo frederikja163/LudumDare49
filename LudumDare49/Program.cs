@@ -1,12 +1,15 @@
 ﻿using System;
+using OpenTK.Windowing.Desktop;
 
 namespace LudumDare49
 {
-    class Program
+    internal static class Program
     {
-        static void Main(string[] args)
+        internal static void Main(string[] args)
         {
-            Console.WriteLine("Hello World!");
+            using Window window = new Window(GameWindowSettings.Default, NativeWindowSettings.Default);
+            
+            window.Run();
         }
     }
 }
