@@ -2,10 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using LudumDare49.OpenGL;
 using OpenTK.Graphics.OpenGL;
 using OpenTK.Mathematics;
 
-namespace LudumDare49.OpenGL
+namespace LudumDare49
 {
     public sealed class Entity3D : IDisposable
     {
@@ -106,6 +107,9 @@ namespace LudumDare49.OpenGL
 
         public void Render()
         {
+            Shader.SetUniform("uProjection", Camera.Projection);
+            Shader.SetUniform("uView", Camera.View);
+            
             Shader.Bind();
             _vao.Bind();
             

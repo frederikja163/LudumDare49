@@ -1,5 +1,3 @@
-using LudumDare49.OpenGL;
-using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL;
 using OpenTK.Mathematics;
 using OpenTK.Windowing.Common;
@@ -9,10 +7,13 @@ namespace LudumDare49
 {
     public sealed class Window : GameWindow
     {
+        public static Window Instance { get; private set; }
+        
         private Entity3D _obj;
         
         public Window(GameWindowSettings gameWindowSettings, NativeWindowSettings nativeWindowSettings) : base(gameWindowSettings, nativeWindowSettings)
         {
+            Instance = this;
         }
 
         protected override void OnLoad()
@@ -38,6 +39,8 @@ namespace LudumDare49
         protected override void OnUnload()
         {
             base.OnUnload();
+            
+            _obj.Dispose();
         }
 
         protected override void OnRenderFrame(FrameEventArgs args)

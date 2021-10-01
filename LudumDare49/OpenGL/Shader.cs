@@ -1,10 +1,9 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
-using System.Reflection;
 using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL;
+using OpenTK.Mathematics;
 
 namespace LudumDare49.OpenGL
 {
@@ -77,6 +76,13 @@ namespace LudumDare49.OpenGL
         {
             Bind();
             GL.Uniform1i(GetUniformLocation(name), value);
+            Unbind();
+        }
+        
+        public void SetUniform(string name, Matrix4 value)
+        {
+            Bind();
+            GL.UniformMatrix4f(GetUniformLocation(name), false, value.Row0.X);
             Unbind();
         }
 

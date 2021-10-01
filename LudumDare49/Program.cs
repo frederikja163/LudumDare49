@@ -1,5 +1,4 @@
-﻿using System;
-using OpenTK.Windowing.Desktop;
+﻿using OpenTK.Windowing.Desktop;
 
 namespace LudumDare49
 {
