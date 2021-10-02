@@ -32,6 +32,7 @@ namespace LudumDare49
         private readonly Entity3D _balance;
         private readonly Entity3D _pivot;
         private readonly Entity3D _ball;
+        private readonly Entity3D _background;
         private readonly Scene _scene;
         private float _angularVelocity;
         private float _angle;
@@ -48,11 +49,13 @@ namespace LudumDare49
                     Vector3.One * 0.5f,
                     Vector3.One * 1f));
 
+            _background = new Entity3D("scene", ".*", "white.png");
+
             _ball = new Entity3D("models", "pumpkinLarge", "white.png");
             
             _balance = new Entity3D("models", "Plank", "Textura_tabla_1.jpg");
             _balance.Transform.Rotation *= Quaternion.FromEulerAngles(0f, MathHelper.DegreesToRadians(90), 0);
-            _balance.Transform.Position += Vector3.UnitY * 1.8f;
+            _balance.Transform.Position += Vector3.UnitY * 2.8f;
 
             _pivot = new Entity3D("models", "gravestone", "white.png");
             _pivot.Transform.Rotation *= Quaternion.FromEulerAngles(0, MathHelper.DegreesToRadians(180), 0);
@@ -96,14 +99,14 @@ namespace LudumDare49
             _angularVelocity -= angularAcceleration * deltaT;
 
             float angle = _angle + _angularVelocity * deltaT;
-            if (angle < -0.45f)
+            if (angle < -0.35f)
             {
-                _angle = -0.45f;
+                _angle = -0.35f;
                 _angularVelocity = 0;
             }
-            else if (angle > 0.45f)
+            else if (angle > 0.35f)
             {
-                _angle = 0.45f;
+                _angle = 0.35f;
                 _angularVelocity = 0;
             }
             else
@@ -116,6 +119,7 @@ namespace LudumDare49
 
         public void Render()
         {
+            _background.Render(_scene);
             _balance.Render(_scene);
             _pivot.Render(_scene);
 

@@ -22,7 +22,7 @@ namespace LudumDare49
 
             _game = new Game(this);
             
-            GL.ClearColor(Color4.Magenta);
+            GL.ClearColor(Color4.White);
         }
 
         protected override void OnUpdateFrame(FrameEventArgs args)

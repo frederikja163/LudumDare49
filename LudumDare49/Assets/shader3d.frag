@@ -6,7 +6,7 @@ struct Material {
     vec3 specular;
     float shininess;
 };
-uniform Material uMaterial[8];
+uniform Material uMaterial[106];
 uniform sampler2D uTexture;
 
 struct DirLight {
@@ -64,13 +64,16 @@ vec3 CalcSpotLight(SpotLight light, vec3 normal, vec3 fragPos, vec3 viewDir);
 void main()
 {
     vec3 norm = normalize(fNorm);
+    float distance = length(uViewPos - fPos);
     vec3 viewDir = normalize(uViewPos - fPos);
 
     vec3 result = CalcDirLight(uDirLight, norm, viewDir);
 //    for(int i = 0; i < NR_POINT_LIGHTS; i++)
 //        result += CalcPointLight(pointLights[i], norm, FragPos, viewDir);
 //    result += CalcSpotLight(spotLight, norm, FragPos, viewDir);
-
+    
+    result = mix(result, vec3(1, 1, 1), clamp(distance / 8 - 1, 0, 2));
+    
     Color = vec4(result, 1.0);
 }
 

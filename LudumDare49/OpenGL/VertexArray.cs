@@ -21,14 +21,14 @@ namespace LudumDare49.OpenGL
             buffer.Unbind();
         }
 
-        public unsafe void AddVertexAttribute<T>(Buffer<T> buffer, int location, int size, VertexAttribPointerType type, int stride, nint offset)
+        public unsafe void AddVertexAttribute<T>(Buffer<T> buffer, int location, int size, VertexAttribPointerType type, bool normalized, int stride, nint offset)
             where T : unmanaged
         {
             Bind();
             buffer.Bind();
             
             GL.EnableVertexAttribArray((uint)location);
-            GL.VertexAttribPointer((uint)location, size, type, false, stride * sizeof(T), offset);
+            GL.VertexAttribPointer((uint)location, size, type, normalized, stride * sizeof(T), offset);
             
             Unbind();
             buffer.Unbind();

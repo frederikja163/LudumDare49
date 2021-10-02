@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.IO;
+using System.Text.RegularExpressions;
 using LudumDare49.OpenGL;
 using OpenTK.Graphics.OpenGL;
 using OpenTK.Mathematics;
@@ -37,10 +37,10 @@ namespace LudumDare49
             _ebo = new Buffer<uint>(BufferTargetARB.ElementArrayBuffer, indices.ToArray());
             _vao = new VertexArray();
             _vao.SetIndexBuffer(_ebo);
-            _vao.AddVertexAttribute(_vbo, 0, 3, VertexAttribPointerType.Float, 9, 0);
-            _vao.AddVertexAttribute(_vbo, 1, 3, VertexAttribPointerType.Float, 9, 3 * sizeof(float));
-            _vao.AddVertexAttribute(_vbo, 2, 2, VertexAttribPointerType.Float, 9, (3 + 3) * sizeof(float));
-            _vao.AddVertexAttribute(_vbo, 3, 1, VertexAttribPointerType.Float, 9, (3 + 3 + 1) * sizeof(float));
+            _vao.AddVertexAttribute(_vbo, 0, 3, VertexAttribPointerType.Float, false, 9, 0);
+            _vao.AddVertexAttribute(_vbo, 1, 3, VertexAttribPointerType.Float, false, 9, 3 * sizeof(float));
+            _vao.AddVertexAttribute(_vbo, 2, 2, VertexAttribPointerType.Float, false, 9, (3 + 3) * sizeof(float));
+            _vao.AddVertexAttribute(_vbo, 3, 1, VertexAttribPointerType.Float, false, 9, (3 + 3 + 2) * sizeof(float));
             _indexCount = indices.Count;
             _texture = new Texture(texturePath);
             Transform = new Transform();
@@ -92,6 +92,8 @@ namespace LudumDare49
             using Stream file = Assets.LoadAsset(path + ".obj");
             StreamReader sr = new StreamReader(file);
 
+            Regex regex = new Regex(meshName);
+            
             indices = new();
             vertices = new();
             List<Vector3> positions = new();
@@ -125,12 +127,12 @@ namespace LudumDare49
                     float y = float.Parse(values[2]);
                     textureCoordinates.Add(new Vector2(x, y));
                 }
-                else if (values[0] == "usemtl" && o == meshName)
+                else if (values[0] == "usemtl" && regex.IsMatch(o))
                 {
                     currentMaterial = usedMaterials.Count;
                     usedMaterials.Add(materials[values[1]]);
                 }
-                else if (values[0] == "f" && o == meshName)
+                else if (values[0] == "f" && regex.IsMatch(o))
                 {
                     for (int i = 1; i < values.Length; i++)
                     {
