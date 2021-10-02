@@ -3,5 +3,5 @@ using OpenTK.Mathematics;
 
 namespace LudumDare49
 {
-    public sealed record Material(Texture Diffuse, Texture Specular, float Shininess);
+    public sealed record Material(Vector3 Ambient, Vector3 Diffuse, Vector3 Specular, float Shininess);
 }

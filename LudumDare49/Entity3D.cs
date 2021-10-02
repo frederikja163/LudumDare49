@@ -15,29 +15,92 @@ namespace LudumDare49
         private readonly Buffer<uint> _ebo;
         private readonly VertexArray _vao;
         private readonly int _indexCount = 0;
-        private readonly Material _material;
+        private readonly Texture _texture;
+        private readonly Material[] _materials;
         public Transform Transform { get; }
         
-        public Entity3D(string meshPath, string meshName, string texturePath)
+        public Entity3D(string path, string meshName, string texturePath)
         {
-            using Stream file = Assets.LoadAsset(meshPath);
+            LoadMaterials(path, out Dictionary<string, Material> allMaterials);
+            LoadModel(path, meshName, allMaterials,
+                out List<uint> indices, out List<float> vertices, out List<Material> usedMaterials);
+            _materials = usedMaterials.ToArray();
+
+#if DEBUG
+            if (vertices.Count <= 0)
+            {
+                Console.Error.WriteLine($"Model does not exist! {meshName}");
+            }
+#endif
+
+            _vbo = new Buffer<float>(BufferTargetARB.ArrayBuffer, vertices.ToArray());
+            _ebo = new Buffer<uint>(BufferTargetARB.ElementArrayBuffer, indices.ToArray());
+            _vao = new VertexArray();
+            _vao.SetIndexBuffer(_ebo);
+            _vao.AddVertexAttribute(_vbo, 0, 3, VertexAttribPointerType.Float, 9, 0);
+            _vao.AddVertexAttribute(_vbo, 1, 3, VertexAttribPointerType.Float, 9, 3 * sizeof(float));
+            _vao.AddVertexAttribute(_vbo, 2, 2, VertexAttribPointerType.Float, 9, (3 + 3) * sizeof(float));
+            _vao.AddVertexAttribute(_vbo, 3, 1, VertexAttribPointerType.Float, 9, (3 + 3 + 1) * sizeof(float));
+            _indexCount = indices.Count;
+            _texture = new Texture(texturePath);
+            Transform = new Transform();
+        }
+
+        private static void LoadMaterials(string path, out Dictionary<string, Material> materials)
+        {
+            using Stream file = Assets.LoadAsset(path + ".mtl");
             StreamReader sr = new StreamReader(file);
 
-            while (!sr.ReadLine().StartsWith("o ") && !sr.EndOfStream) ;
-            if (sr.EndOfStream)
+            materials = new();
+            string currentMaterial = "";
+            while (!sr.EndOfStream)
             {
-                return;
+                string line = sr.ReadLine();
+                string[] values = line.Split(' ');
+                if (values[0] == "Ka")
+                {
+                    float x = float.Parse(values[1]);
+                    float y = float.Parse(values[2]);
+                    float z = float.Parse(values[3]);
+                    materials[currentMaterial] = materials[currentMaterial] with { Ambient = new Vector3(x, y, z) };
+                }
+                else if (values[0] == "Kd")
+                {
+                    float x = float.Parse(values[1]);
+                    float y = float.Parse(values[2]);
+                    float z = float.Parse(values[3]);
+                    materials[currentMaterial] = materials[currentMaterial] with { Diffuse = new Vector3(x, y, z) };
+                }
+                else if (values[0] == "Ks")
+                {
+                    float x = float.Parse(values[1]);
+                    float y = float.Parse(values[2]);
+                    float z = float.Parse(values[3]);
+                    materials[currentMaterial] = materials[currentMaterial] with { Specular = new Vector3(x, y, z) };
+                }
+                else if (values[0] == "newmtl")
+                {
+                    currentMaterial = values[1];
+                    materials.Add(currentMaterial, new Material(Vector3.One, Vector3.One, Vector3.One, 8));
+                }
             }
+        }
 
-            
-            List<uint> indices = new ();
-            List<float> vertices = new ();
-            List<Vector3> positions = new ();
-            List<Vector3> normals = new ();
-            List<Vector2> textureCoordinates = new ();
-            Dictionary<string, uint> vertexIndices = new ();
+        private static void LoadModel(string path, string meshName, Dictionary<string, Material> materials,
+            out List<uint> indices, out List<float> vertices, out List<Material> usedMaterials)
+        {
+            using Stream file = Assets.LoadAsset(path + ".obj");
+            StreamReader sr = new StreamReader(file);
+
+            indices = new();
+            vertices = new();
+            List<Vector3> positions = new();
+            List<Vector3> normals = new();
+            List<Vector2> textureCoordinates = new();
+            Dictionary<string, uint> vertexIndices = new();
             string o = "";
-            CultureInfo.CurrentCulture = CultureInfo.InvariantCulture;
+            int currentMaterial = 0;
+            usedMaterials = new();
             while (!sr.EndOfStream)
             {
                 string line = sr.ReadLine();
@@ -62,6 +125,11 @@ namespace LudumDare49
                     float y = float.Parse(values[2]);
                     textureCoordinates.Add(new Vector2(x, y));
                 }
+                else if (values[0] == "usemtl" && o == meshName)
+                {
+                    currentMaterial = usedMaterials.Count;
+                    usedMaterials.Add(materials[values[1]]);
+                }
                 else if (values[0] == "f" && o == meshName)
                 {
                     for (int i = 1; i < values.Length; i++)
@@ -84,7 +152,8 @@ namespace LudumDare49
                             vertices.Add(normal.Z);
                             vertices.Add(textureCoordinate.X);
                             vertices.Add(textureCoordinate.Y);
-                            index = (uint) vertices.Count / (3 + 3 + 2) - 1;
+                            vertices.Add(currentMaterial);
+                            index = (uint)vertices.Count / (3 + 3 + 2 + 1) - 1;
                             vertexIndices.Add(values[i], index);
                         }
 
@@ -96,33 +165,21 @@ namespace LudumDare49
                     o = values[1];
                 }
             }
-
-#if DEBUG
-            if (vertices.Count <= 0)
-            {
-                Console.Error.WriteLine($"Model does not exist! {meshName}");
-            }
-#endif
-
-            _vbo = new Buffer<float>(BufferTargetARB.ArrayBuffer, vertices.ToArray());
-            _ebo = new Buffer<uint>(BufferTargetARB.ElementArrayBuffer, indices.ToArray());
-            _vao = new VertexArray();
-            _vao.SetIndexBuffer(_ebo);
-            _vao.AddVertexAttribute(_vbo, 0, 3, VertexAttribPointerType.Float, 8, 0);
-            _vao.AddVertexAttribute(_vbo, 1, 3, VertexAttribPointerType.Float, 8, 3 * sizeof(float));
-            _vao.AddVertexAttribute(_vbo, 2, 2, VertexAttribPointerType.Float, 8, (3 + 3) * sizeof(float));
-            _indexCount = indices.Count;
-            _material = new Material(new Texture(texturePath), new Texture(texturePath), 32);
-            Transform = new Transform();
         }
 
         public void Render(Scene scene)
         {
-            Shader.SetUniform("uMaterial.diffuse", 0);
-            _material.Diffuse.Bind(TextureUnit.Texture0);
-            Shader.SetUniform("uMaterial.specular", 1);
-            _material.Diffuse.Bind(TextureUnit.Texture1);
-            Shader.SetUniform("uMaterial.shininess", 32f);
+            for (int i = 0; i < _materials.Length; i++)
+            {
+                Shader.SetUniform($"uMaterial[{i}].ambient", _materials[i].Ambient);
+                Shader.SetUniform($"uMaterial[{i}].diffuse", _materials[i].Diffuse);
+                Shader.SetUniform($"uMaterial[{i}].specular", _materials[i].Specular);
+                Shader.SetUniform($"uMaterial[{i}].shininess", _materials[i].Shininess);
+            }
+            
+            Shader.SetUniform("uTexture", 0);
+            _texture.Bind(TextureUnit.Texture0);
+            
             Shader.SetScene(scene);
             Shader.SetUniform("uModel", Transform.Matrix);
             

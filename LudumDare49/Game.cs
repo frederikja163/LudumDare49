@@ -24,16 +24,14 @@ namespace LudumDare49
         }
         
         private List<Weight> _weights = new (){
-            new Weight(0f, 5f),
-            new Weight(-0.5f, 1.6f),
-            new Weight(0.5f, 0.8f),
+            new Weight(0f, 3.2f),
+            new Weight(-0.1f, 1.6f),
         };
         
         private readonly Window _window;
         private readonly Entity3D _balance;
         private readonly Entity3D _pivot;
         private readonly Entity3D _ball;
-        private readonly Entity3D _rightBall;
         private readonly Scene _scene;
         private float _angularVelocity;
         private float _angle;
@@ -45,19 +43,18 @@ namespace LudumDare49
             _window = window;
             
             _scene = new Scene(new Camera(_window),
-                new DirectionalLight(new Vector3(0.1f, -0.5f, -0.4f),
+                new DirectionalLight(new Vector3(0.2f, -1.0f, 0.3f),
                     Vector3.One * 0.2f,
-                    Vector3.One * 0.6f,
-                    Vector3.One * 0.8f));
+                    Vector3.One * 0.5f,
+                    Vector3.One * 1f));
 
-            _ball = new Entity3D("models.obj", "pumpkinLarge", "white.png");
+            _ball = new Entity3D("models", "pumpkinLarge", "white.png");
             
-            _balance = new Entity3D("models.obj", "Plank", "WoodenPlank.png");
+            _balance = new Entity3D("models", "Plank", "Textura_tabla_1.jpg");
             _balance.Transform.Rotation *= Quaternion.FromEulerAngles(0f, MathHelper.DegreesToRadians(90), 0);
             _balance.Transform.Position += Vector3.UnitY * 1.8f;
 
-            _pivot = new Entity3D("models.obj", "gravestone", "white.png");
-            _pivot.Transform.Position = Vector3.UnitZ * -.3f;
+            _pivot = new Entity3D("models", "gravestone", "white.png");
             _pivot.Transform.Rotation *= Quaternion.FromEulerAngles(0, MathHelper.DegreesToRadians(180), 0);
         }
 
@@ -73,7 +70,6 @@ namespace LudumDare49
             {
                 Weight weight = _weights[i];
                 weight.Distance = MathHelper.Clamp(weight.Distance - _angle * deltaT * weight.Force, -0.95f, 0.95f);
-                
             }
             
             UpdateMouse();
