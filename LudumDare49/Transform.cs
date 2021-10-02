@@ -21,7 +21,7 @@ namespace LudumDare49
             get => _scale;
             set
             {
-                _scale = Scale;
+                _scale = value;
                 Update();
             }
         }
@@ -50,6 +50,10 @@ namespace LudumDare49
         
         public Matrix4 Matrix { get; private set; }
         
+        public Vector3 Forward => Vector3.Transform(Vector3.UnitZ, Rotation).Normalized();
+        public Vector3 Right => Vector3.Transform(Vector3.UnitX, Rotation).Normalized();
+        public Vector3 Up => Vector3.Transform(Vector3.UnitY, Rotation).Normalized();
+        
         public Transform()
         {
             Update();
@@ -58,8 +62,8 @@ namespace LudumDare49
         private void Update()
         {
             Matrix = Matrix4.CreateFromQuaternion(_rotation) *
-                     Matrix4.CreateTranslation(_position) *
-                     Matrix4.CreateScale(_scale);
+                     Matrix4.CreateScale(_scale) *
+                     Matrix4.CreateTranslation(_position);
         }
     }
 }

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Drawing.Drawing2D;
 using System.Linq;
 using OpenTK.Graphics.OpenGL;
@@ -22,28 +23,22 @@ namespace LudumDare49
             }
         }
         
-        private Weight[] _weights = new []{
-            new Weight(-0.55f, 1f),
-            new Weight(0.45f,  1f),
+        private List<Weight> _weights = new (){
             new Weight(0f, 5f),
-            new Weight(-0.5f, 2f),
-            new Weight(0.5f, 2f),
+            new Weight(-0.5f, 1.6f),
+            new Weight(0.5f, 0.8f),
         };
         
         private readonly Window _window;
         private readonly Entity3D _balance;
         private readonly Entity3D _pivot;
-        private readonly Entity3D _leftBall;
+        private readonly Entity3D _ball;
         private readonly Entity3D _rightBall;
         private readonly Scene _scene;
         private float _angularVelocity;
         private float _angle;
-
-        private Weight PlankLeft => _weights[0];
-        private Weight PlankRight => _weights[1];
-        private Weight Mouse => _weights[2];
-        private Weight LeftBall => _weights[3];
-        private Weight RightBall => _weights[4];
+        
+        private Weight Mouse => _weights[0];
 
         public Game(Window window)
         {
@@ -55,19 +50,32 @@ namespace LudumDare49
                     Vector3.One * 0.6f,
                     Vector3.One * 0.8f));
 
-            _rightBall = new Entity3D("models.obj", "pumpkinLarge", "white.png");
-            _leftBall = new Entity3D("models.obj", "pumpkinLarge", "white.png");
+            _ball = new Entity3D("models.obj", "pumpkinLarge", "white.png");
             
             _balance = new Entity3D("models.obj", "Plank", "WoodenPlank.png");
             _balance.Transform.Rotation *= Quaternion.FromEulerAngles(0f, MathHelper.DegreesToRadians(90), 0);
             _balance.Transform.Position += Vector3.UnitY * 1.8f;
-            
+
             _pivot = new Entity3D("models.obj", "gravestone", "white.png");
-            _pivot.Transform.Rotation *= Quaternion.FromEulerAngles(0, MathHelper.DegreesToRadians(90), 0);
+            _pivot.Transform.Position = Vector3.UnitZ * -.3f;
+            _pivot.Transform.Rotation *= Quaternion.FromEulerAngles(0, MathHelper.DegreesToRadians(180), 0);
+        }
+
+        public void AddWeight(float distance, float weight)
+        {
+            _weights.Add(new Weight(distance, weight));
         }
 
         public void Update(float deltaT)
         {
+            Transform transform = _balance.Transform;
+            for (int i = 1; i < _weights.Count; i++)
+            {
+                Weight weight = _weights[i];
+                weight.Distance = MathHelper.Clamp(weight.Distance - _angle * deltaT * weight.Force, -0.95f, 0.95f);
+                
+            }
+            
             UpdateMouse();
 
             UpdatePlank(deltaT);
@@ -80,6 +88,10 @@ namespace LudumDare49
                 float mouse = _window.MousePosition.X / _window.ClientSize.X * 2 - 1;
                 Mouse.Distance = mouse;
             }
+            else
+            {
+                Mouse.Distance = 0;
+            }
         }
 
         private void UpdatePlank(float deltaT)
@@ -87,24 +99,41 @@ namespace LudumDare49
             float angularAcceleration = _weights.Sum(w => w.Torque);
             _angularVelocity -= angularAcceleration * deltaT;
 
-            _angle += _angularVelocity * deltaT;
-            if (_angle is < 0.45f and > -0.45f)
+            float angle = _angle + _angularVelocity * deltaT;
+            if (angle < -0.45f)
             {
-                _balance.Transform.Rotation = Quaternion.FromEulerAngles(Vector3.UnitY * MathHelper.DegreesToRadians(90)) *
-                                              Quaternion.FromEulerAngles(Vector3.UnitX * _angle);
+                _angle = -0.45f;
+                _angularVelocity = 0;
+            }
+            else if (angle > 0.45f)
+            {
+                _angle = 0.45f;
+                _angularVelocity = 0;
             }
             else
             {
-                _angularVelocity = 0;
+                _angle = angle;
             }
+            _balance.Transform.Rotation = Quaternion.FromEulerAngles(Vector3.UnitY * MathHelper.DegreesToRadians(90)) *
+                                          Quaternion.FromEulerAngles(Vector3.UnitX * _angle);
         }
 
         public void Render()
         {
             _balance.Render(_scene);
             _pivot.Render(_scene);
-            _leftBall.Render(_scene);
-            _rightBall.Render(_scene);
+
+            Transform transform = _balance.Transform;
+            for (int i = 1; i < _weights.Count; i++)
+            {
+                Weight weight = _weights[i];
+                _ball.Transform.Scale = Vector3.One * weight.Force;
+                float distance = 4.4f * weight.Distance;
+                float radius = 0.6f * weight.Force;
+                _ball.Transform.Rotation = Quaternion.FromEulerAngles(Vector3.UnitZ * distance / radius);
+                _ball.Transform.Position = -transform.Forward * distance + transform.Position + transform.Up * radius;
+                _ball.Render(_scene);
+            }
         }
 
         public void Dispose()

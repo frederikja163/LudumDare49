@@ -29,7 +29,7 @@ namespace LudumDare49
         {
             base.OnUpdateFrame(args);
             
-            _game.Update((float)args.Time * 0.5f);
+            _game.Update((float)args.Time);
         }
 
         public void Render()
