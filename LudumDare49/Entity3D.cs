@@ -16,7 +16,8 @@ namespace LudumDare49
         private readonly VertexArray _vao;
         private readonly int _indexCount = 0;
         private readonly Material _material;
-
+        public Transform Transform { get; }
+        
         public Entity3D(string meshPath, string meshName, string texturePath)
         {
             using Stream file = Assets.LoadAsset(meshPath);
@@ -112,16 +113,18 @@ namespace LudumDare49
             _vao.AddVertexAttribute(_vbo, 2, 2, VertexAttribPointerType.Float, 8, (3 + 3) * sizeof(float));
             _indexCount = indices.Count;
             _material = new Material(new Texture(texturePath), new Texture(texturePath), 32);
+            Transform = new Transform();
         }
 
         public void Render(Scene scene)
         {
-            Shader.SetUniform("material.diffuse", 0);
+            Shader.SetUniform("uMaterial.diffuse", 0);
             _material.Diffuse.Bind(TextureUnit.Texture0);
-            Shader.SetUniform("material.specular", 1);
+            Shader.SetUniform("uMaterial.specular", 1);
             _material.Diffuse.Bind(TextureUnit.Texture1);
-            Shader.SetUniform("material.shininess", 32f);
+            Shader.SetUniform("uMaterial.shininess", 32f);
             Shader.SetScene(scene);
+            Shader.SetUniform("uModel", Transform.Matrix);
             
             Shader.Bind();
             _vao.Bind();

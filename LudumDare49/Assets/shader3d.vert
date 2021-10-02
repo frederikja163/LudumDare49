@@ -5,6 +5,7 @@ layout(location = 2) in vec2 vTexCoord;
 
 uniform mat4 uProjection;
 uniform mat4 uView;
+uniform mat4 uModel;
 
 out vec3 fPos;
 out vec3 fNorm;
@@ -12,9 +13,9 @@ out vec2 fTexCoord;
 
 void main()
 {
-    gl_Position = uProjection * uView * vec4(vPos, 1);
+    gl_Position = uProjection * uView * uModel * vec4(vPos, 1);
     
-    fPos = vPos;
-    fNorm = vNorm;
+    fPos = vec3(uModel * vec4(vPos, 1));
+    fNorm = mat3(transpose(inverse(uModel))) * vNorm;
     fTexCoord = vTexCoord;
 }

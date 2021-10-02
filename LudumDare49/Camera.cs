@@ -27,7 +27,7 @@ namespace LudumDare49
         {
             SetProjection(window.ClientSize.X, window.ClientSize.Y);
             window.Resize += OnResize;
-            ViewPos = new Vector3(0, 1f, -3f);
+            ViewPos = new Vector3(0, 3f, -6f);
         }
 
         private void OnResize(ResizeEventArgs args)

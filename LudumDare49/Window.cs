@@ -1,3 +1,4 @@
+using System;
 using OpenTK.Graphics.OpenGL;
 using OpenTK.Mathematics;
 using OpenTK.Windowing.Common;
@@ -7,17 +8,10 @@ namespace LudumDare49
 {
     public sealed class Window : GameWindow
     {
-        private Scene _scene;
-        private Entity3D _obj;
-        private Entity3D _pivot;
+        private Game _game;
         
         public Window(GameWindowSettings gameWindowSettings, NativeWindowSettings nativeWindowSettings) : base(gameWindowSettings, nativeWindowSettings)
         {
-            _scene = new Scene(new Camera(this),
-                new DirectionalLight(new Vector3(0.1f, -0.5f, -0.4f),
-                    Vector3.One * 0.2f,
-                    Vector3.One * 0.6f,
-                    Vector3.One * 0.8f));
         }
 
         protected override void OnLoad()
@@ -26,18 +20,23 @@ namespace LudumDare49
             GL.Enable(EnableCap.DepthTest);
             GL.DepthFunc(DepthFunction.Less);
 
-            _obj = new Entity3D("models.obj", "Plank", "WoodenPlank.png");
-            _pivot = new Entity3D("models.obj", "gravestone", "white.png");
+            _game = new Game(this);
             
             GL.ClearColor(Color4.Magenta);
+        }
+
+        protected override void OnUpdateFrame(FrameEventArgs args)
+        {
+            base.OnUpdateFrame(args);
+            
+            _game.Update((float)args.Time * 0.5f);
         }
 
         public void Render()
         {
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
             
-            _obj.Render(_scene);
-            _pivot.Render(_scene);
+            _game.Render();
             
             SwapBuffers();
         }
@@ -45,8 +44,7 @@ namespace LudumDare49
         protected override void OnUnload()
         {
             base.OnUnload();
-            
-            _obj.Dispose();
+            _game.Dispose();
         }
 
         protected override void OnRenderFrame(FrameEventArgs args)

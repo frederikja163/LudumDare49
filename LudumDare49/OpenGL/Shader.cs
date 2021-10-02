@@ -68,6 +68,7 @@ namespace LudumDare49.OpenGL
             if (!_uniformLocations.TryGetValue(name, out int location))
             {
                 location = GL.GetUniformLocation(_handle, name);
+                _uniformLocations.Add(name, location);
             }
             return location;
         }
@@ -105,12 +106,12 @@ namespace LudumDare49.OpenGL
             Bind();
             GL.UniformMatrix4f(GetUniformLocation("uProjection"), false, scene.Camera.Projection.Row0.X);
             GL.UniformMatrix4f(GetUniformLocation("uView"), false, scene.Camera.View.Row0.X);
-            GL.Uniform3f(GetUniformLocation("viewPos"), scene.Camera.ViewPos);
+            GL.Uniform3f(GetUniformLocation("uViewPos"), scene.Camera.ViewPos);
             
-            GL.Uniform3f(GetUniformLocation("dirLight.direction"), scene.DirectionalLight.Direction);
-            GL.Uniform3f(GetUniformLocation("dirLight.ambient"), scene.DirectionalLight.Ambient);
-            GL.Uniform3f(GetUniformLocation("dirLight.diffuse"), scene.DirectionalLight.Diffuse);
-            GL.Uniform3f(GetUniformLocation("dirLight.specular"), scene.DirectionalLight.Specular);
+            GL.Uniform3f(GetUniformLocation("uDirLight.direction"), scene.DirectionalLight.Direction);
+            GL.Uniform3f(GetUniformLocation("uDirLight.ambient"), scene.DirectionalLight.Ambient);
+            GL.Uniform3f(GetUniformLocation("uDirLight.diffuse"), scene.DirectionalLight.Diffuse);
+            GL.Uniform3f(GetUniformLocation("uDirLight.specular"), scene.DirectionalLight.Specular);
             Unbind();
         }
 
