@@ -7,13 +7,17 @@ namespace LudumDare49
 {
     public sealed class Window : GameWindow
     {
-        public static Window Instance { get; private set; }
-        
+        private Scene _scene;
         private Entity3D _obj;
+        private Entity3D _pivot;
         
         public Window(GameWindowSettings gameWindowSettings, NativeWindowSettings nativeWindowSettings) : base(gameWindowSettings, nativeWindowSettings)
         {
-            Instance = this;
+            _scene = new Scene(new Camera(this),
+                new DirectionalLight(new Vector3(0.1f, -0.5f, -0.4f),
+                    Vector3.One * 0.2f,
+                    Vector3.One * 0.6f,
+                    Vector3.One * 0.8f));
         }
 
         protected override void OnLoad()
@@ -22,7 +26,8 @@ namespace LudumDare49
             GL.Enable(EnableCap.DepthTest);
             GL.DepthFunc(DepthFunction.Less);
 
-            _obj = new Entity3D("models.obj", "coffinB");
+            _obj = new Entity3D("models.obj", "Plank", "WoodenPlank.png");
+            _pivot = new Entity3D("models.obj", "gravestone", "white.png");
             
             GL.ClearColor(Color4.Magenta);
         }
@@ -31,7 +36,8 @@ namespace LudumDare49
         {
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
             
-            _obj.Render();
+            _obj.Render(_scene);
+            _pivot.Render(_scene);
             
             SwapBuffers();
         }

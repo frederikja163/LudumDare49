@@ -15,10 +15,11 @@ namespace LudumDare49
         private readonly Buffer<uint> _ebo;
         private readonly VertexArray _vao;
         private readonly int _indexCount = 0;
+        private readonly Material _material;
 
-        public Entity3D(string path, string meshName)
+        public Entity3D(string meshPath, string meshName, string texturePath)
         {
-            using Stream file = Assets.LoadAsset(path);
+            using Stream file = Assets.LoadAsset(meshPath);
             StreamReader sr = new StreamReader(file);
 
             while (!sr.ReadLine().StartsWith("o ") && !sr.EndOfStream) ;
@@ -95,20 +96,32 @@ namespace LudumDare49
                 }
             }
 
+#if DEBUG
+            if (vertices.Count <= 0)
+            {
+                Console.Error.WriteLine($"Model does not exist! {meshName}");
+            }
+#endif
+
             _vbo = new Buffer<float>(BufferTargetARB.ArrayBuffer, vertices.ToArray());
             _ebo = new Buffer<uint>(BufferTargetARB.ElementArrayBuffer, indices.ToArray());
             _vao = new VertexArray();
             _vao.SetIndexBuffer(_ebo);
             _vao.AddVertexAttribute(_vbo, 0, 3, VertexAttribPointerType.Float, 8, 0);
             _vao.AddVertexAttribute(_vbo, 1, 3, VertexAttribPointerType.Float, 8, 3 * sizeof(float));
-            _vao.AddVertexAttribute(_vbo, 2, 2, VertexAttribPointerType.Float, 8, 3 * 3 * sizeof(float));
+            _vao.AddVertexAttribute(_vbo, 2, 2, VertexAttribPointerType.Float, 8, (3 + 3) * sizeof(float));
             _indexCount = indices.Count;
+            _material = new Material(new Texture(texturePath), new Texture(texturePath), 32);
         }
 
-        public void Render()
+        public void Render(Scene scene)
         {
-            Shader.SetUniform("uProjection", Camera.Projection);
-            Shader.SetUniform("uView", Camera.View);
+            Shader.SetUniform("material.diffuse", 0);
+            _material.Diffuse.Bind(TextureUnit.Texture0);
+            Shader.SetUniform("material.specular", 1);
+            _material.Diffuse.Bind(TextureUnit.Texture1);
+            Shader.SetUniform("material.shininess", 32f);
+            Shader.SetScene(scene);
             
             Shader.Bind();
             _vao.Bind();

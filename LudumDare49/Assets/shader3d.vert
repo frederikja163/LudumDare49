@@ -6,6 +6,7 @@ layout(location = 2) in vec2 vTexCoord;
 uniform mat4 uProjection;
 uniform mat4 uView;
 
+out vec3 fPos;
 out vec3 fNorm;
 out vec2 fTexCoord;
 
@@ -13,6 +14,7 @@ void main()
 {
     gl_Position = uProjection * uView * vec4(vPos, 1);
     
+    fPos = vPos;
     fNorm = vNorm;
     fTexCoord = vTexCoord;
 }

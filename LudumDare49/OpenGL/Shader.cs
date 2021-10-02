@@ -78,11 +78,39 @@ namespace LudumDare49.OpenGL
             GL.Uniform1i(GetUniformLocation(name), value);
             Unbind();
         }
-        
+
+        public void SetUniform(string name, float value)
+        {
+            Bind();
+            GL.Uniform1f(GetUniformLocation(name), value);
+            Unbind();
+        }
+
+        public void SetUniform(string name, Vector3 value)
+        {
+            Bind();
+            GL.Uniform3f(GetUniformLocation(name), value);
+            Unbind();
+        }
+
         public void SetUniform(string name, Matrix4 value)
         {
             Bind();
             GL.UniformMatrix4f(GetUniformLocation(name), false, value.Row0.X);
+            Unbind();
+        }
+
+        public void SetScene(Scene scene)
+        {
+            Bind();
+            GL.UniformMatrix4f(GetUniformLocation("uProjection"), false, scene.Camera.Projection.Row0.X);
+            GL.UniformMatrix4f(GetUniformLocation("uView"), false, scene.Camera.View.Row0.X);
+            GL.Uniform3f(GetUniformLocation("viewPos"), scene.Camera.ViewPos);
+            
+            GL.Uniform3f(GetUniformLocation("dirLight.direction"), scene.DirectionalLight.Direction);
+            GL.Uniform3f(GetUniformLocation("dirLight.ambient"), scene.DirectionalLight.Ambient);
+            GL.Uniform3f(GetUniformLocation("dirLight.diffuse"), scene.DirectionalLight.Diffuse);
+            GL.Uniform3f(GetUniformLocation("dirLight.specular"), scene.DirectionalLight.Specular);
             Unbind();
         }
 
