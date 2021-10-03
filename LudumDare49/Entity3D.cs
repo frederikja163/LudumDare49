@@ -15,11 +15,12 @@ namespace LudumDare49
         private readonly Buffer<uint> _ebo;
         private readonly VertexArray _vao;
         private readonly int _indexCount = 0;
-        private readonly Texture _texture;
+        private readonly Texture _diffuse;
+        private readonly Texture _specular;
         private readonly Material[] _materials;
         public Transform Transform { get; }
         
-        public Entity3D(string path, string meshName, string texturePath)
+        public Entity3D(string path, string meshName, string diffusePath, string specularPath)
         {
             LoadMaterials(path, out Dictionary<string, Material> allMaterials);
             LoadModel(path, meshName, allMaterials,
@@ -42,7 +43,8 @@ namespace LudumDare49
             _vao.AddVertexAttribute(_vbo, 2, 2, VertexAttribPointerType.Float, false, 9, (3 + 3) * sizeof(float));
             _vao.AddVertexAttribute(_vbo, 3, 1, VertexAttribPointerType.Float, false, 9, (3 + 3 + 2) * sizeof(float));
             _indexCount = indices.Count;
-            _texture = new Texture(texturePath);
+            _diffuse = new Texture(diffusePath);
+            _specular = new Texture(specularPath);
             Transform = new Transform();
         }
 
@@ -179,8 +181,10 @@ namespace LudumDare49
                 Shader.SetUniform($"uMaterial[{i}].shininess", _materials[i].Shininess);
             }
             
-            Shader.SetUniform("uTexture", 0);
-            _texture.Bind(TextureUnit.Texture0);
+            Shader.SetUniform("uDiffuse", 0);
+            Shader.SetUniform("uSpecular", 1);
+            _diffuse.Bind(TextureUnit.Texture0);
+            _specular.Bind(TextureUnit.Texture1);
             
             Shader.SetScene(scene);
             Shader.SetUniform("uModel", Transform.Matrix);

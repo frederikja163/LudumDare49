@@ -3,6 +3,7 @@ using LudumDare49.OpenGL;
 using OpenTK.Graphics.OpenGL;
 using OpenTK.Mathematics;
 using OpenTK.Windowing.Common;
+using OpenTK.Windowing.Common.Input;
 using OpenTK.Windowing.Desktop;
 
 namespace LudumDare49
@@ -27,6 +28,7 @@ namespace LudumDare49
             Sprite.WindowSize = ClientSize;
 
             GL.ClearColor(Color4.White);
+            WindowState = WindowState.Maximized;
         }
 
         protected override void OnUpdateFrame(FrameEventArgs args)
