@@ -72,7 +72,7 @@ namespace LudumDare49
 
             _ball = new Entity3D("models", "pumpkinLarge", "Dirt2.png", "Dirt3.png");
             
-            _balance = new Entity3D("models", "Plank", "Textura_tabla_1.png", "Dirt3.png");
+            _balance = new Entity3D("models", "Plank", "plankdiff.jpg", "plankspec.png");
             _balance.Transform.Rotation *= Quaternion.FromEulerAngles(0f, MathHelper.DegreesToRadians(90), 0);
             _balance.Transform.Position += Vector3.UnitY * 2.8f;
 
