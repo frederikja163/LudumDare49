@@ -10,6 +10,8 @@ namespace LudumDare49.OpenGL
     public sealed class Texture : IDisposable
     {
         private readonly TextureHandle _handle;
+        public int Width { get; }
+        public int Height { get; }
 
         public Texture(string path)
         {
@@ -17,6 +19,8 @@ namespace LudumDare49.OpenGL
 
             using Stream stream = Assets.LoadAsset(path);
             using Bitmap bitmap = new Bitmap(stream);
+            Width = bitmap.Width;
+            Height = bitmap.Height;
             BitmapData data = bitmap.LockBits(new Rectangle(0, 0, bitmap.Width, bitmap.Height),
                 ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
 

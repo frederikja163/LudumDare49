@@ -81,7 +81,7 @@ namespace LudumDare49
                 else if (values[0] == "newmtl")
                 {
                     currentMaterial = values[1];
-                    materials.Add(currentMaterial, new Material(Vector3.One, Vector3.One, Vector3.One, 8));
+                    materials.Add(currentMaterial, new Material(Vector3.One, Vector3.One, Vector3.One, 16));
                 }
             }
         }

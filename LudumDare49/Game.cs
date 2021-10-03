@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing.Drawing2D;
 using System.Linq;
+using System.Threading;
 using OpenTK.Graphics.OpenGL;
 using OpenTK.Mathematics;
 using OpenTK.Windowing.GraphicsLibraryFramework;
@@ -24,8 +26,8 @@ namespace LudumDare49
         }
         
         private List<Weight> _weights = new (){
-            new Weight(0f, 3.2f),
-            new Weight(-0.1f, 1.6f),
+            new Weight(0f, 5f),
+            new Weight(0f, 1f),
         };
         
         private readonly Window _window;
@@ -36,18 +38,24 @@ namespace LudumDare49
         private readonly Scene _scene;
         private float _angularVelocity;
         private float _angle;
+        private Random _random = new Random();
+        private readonly Timer _timer;
+
+        private bool _isGameOver = false;
         
         private Weight Mouse => _weights[0];
 
         public Game(Window window)
         {
             _window = window;
+
+            _timer = new Timer(TimerElapsed, null, 10000, 10000);
             
             _scene = new Scene(new Camera(_window),
                 new DirectionalLight(new Vector3(0.2f, -1.0f, 0.3f),
                     Vector3.One * 0.2f,
                     Vector3.One * 0.5f,
-                    Vector3.One * 1f));
+                    Vector3.One * 0.6f));
 
             _background = new Entity3D("scene", ".*", "white.png");
 
@@ -61,27 +69,45 @@ namespace LudumDare49
             _pivot.Transform.Rotation *= Quaternion.FromEulerAngles(0, MathHelper.DegreesToRadians(180), 0);
         }
 
-        public void AddWeight(float distance, float weight)
+        private void TimerElapsed(object? state)
         {
-            _weights.Add(new Weight(distance, weight));
+            AddWeight();
+        }
+
+        public void AddWeight()
+        {
+            float weight = (float)_random.NextDouble() + 0.5f;
+            _weights.Add(new Weight(0, weight));
         }
 
         public void Update(float deltaT)
+        {
+            UpdateWeights(deltaT);
+            UpdateMouse();
+            UpdatePlank(deltaT);
+        }
+
+        private void UpdateWeights(float deltaT)
         {
             Transform transform = _balance.Transform;
             for (int i = 1; i < _weights.Count; i++)
             {
                 Weight weight = _weights[i];
-                weight.Distance = MathHelper.Clamp(weight.Distance - _angle * deltaT * weight.Force, -0.95f, 0.95f);
+                weight.Distance -= _angle * deltaT * 1/weight.Force;
+                if (weight.Distance is > 0.95f or < -0.95f)
+                {
+                    _isGameOver = true;
+                }
             }
-            
-            UpdateMouse();
-
-            UpdatePlank(deltaT);
         }
 
         private void UpdateMouse()
         {
+            if (_isGameOver)
+            {
+                return;
+            }
+            
             if (_window.MouseState.IsButtonDown(MouseButton.Left))
             {
                 float mouse = _window.MousePosition.X / _window.ClientSize.X * 2 - 1;
@@ -128,10 +154,19 @@ namespace LudumDare49
             {
                 Weight weight = _weights[i];
                 _ball.Transform.Scale = Vector3.One * weight.Force;
-                float distance = 4.4f * weight.Distance;
+                const float plankLength = 6;
+                float distance = plankLength * weight.Distance;
                 float radius = 0.6f * weight.Force;
                 _ball.Transform.Rotation = Quaternion.FromEulerAngles(Vector3.UnitZ * distance / radius);
-                _ball.Transform.Position = -transform.Forward * distance + transform.Position + transform.Up * radius;
+                if (weight.Distance is > 1f or < -1f)
+                {
+                    Vector3 pos = -transform.Forward * plankLength * MathF.Sign(weight.Distance) + transform.Position + transform.Up * radius;
+                    _ball.Transform.Position = -Vector3.UnitX * (weight.Distance - MathF.Sign(weight.Distance)) * plankLength + pos;
+                }
+                else
+                {
+                    _ball.Transform.Position = -transform.Forward * distance + transform.Position + transform.Up * radius;
+                }
                 _ball.Render(_scene);
             }
         }

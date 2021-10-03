@@ -1,4 +1,5 @@
 using System;
+using LudumDare49.OpenGL;
 using OpenTK.Graphics.OpenGL;
 using OpenTK.Mathematics;
 using OpenTK.Windowing.Common;
@@ -19,9 +20,12 @@ namespace LudumDare49
             base.OnLoad();
             GL.Enable(EnableCap.DepthTest);
             GL.DepthFunc(DepthFunction.Less);
+            GL.Enable(EnableCap.Blend);
+            GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
 
             _game = new Game(this);
-            
+            Sprite.WindowSize = ClientSize;
+
             GL.ClearColor(Color4.White);
         }
 
@@ -59,6 +63,7 @@ namespace LudumDare49
             base.OnResize(e);
             
             GL.Viewport(0, 0, e.Width, e.Height);
+            Sprite.WindowSize = e.Size;
             
             Render();
         }

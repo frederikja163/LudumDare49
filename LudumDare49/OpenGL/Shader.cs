@@ -87,10 +87,24 @@ namespace LudumDare49.OpenGL
             Unbind();
         }
 
+        public void SetUniform(string name, Vector2 value)
+        {
+            Bind();
+            GL.Uniform2f(GetUniformLocation(name), value);
+            Unbind();
+        }
+        
         public void SetUniform(string name, Vector3 value)
         {
             Bind();
             GL.Uniform3f(GetUniformLocation(name), value);
+            Unbind();
+        }
+        
+        public void SetUniform(string name, Vector4 value)
+        {
+            Bind();
+            GL.Uniform4f(GetUniformLocation(name), value);
             Unbind();
         }
 
