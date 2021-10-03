@@ -31,6 +31,8 @@ namespace LudumDare49
         private List<Weight> _weights = new (){
             new Weight(0f, 5f),
         };
+
+        private Weight _nextWeight = new Weight(0, 1);
         
         private readonly Window _window;
         private readonly Entity3D _balance;
@@ -84,9 +86,10 @@ namespace LudumDare49
 
         public void AddWeight()
         {
+            _weights.Add(_nextWeight);
             _timeForPumpkin = 10;
             float weight = (float)_random.NextDouble() + 0.5f;
-            _weights.Add(new Weight(0, weight));
+            _nextWeight = new Weight(0, weight);
         }
 
         public void Update(float deltaT)
@@ -180,13 +183,14 @@ namespace LudumDare49
             _pivot.Render(_scene);
 
             Transform transform = _balance.Transform;
+            const float pumpRad = 0.6f;
             for (int i = 1; i < _weights.Count; i++)
             {
                 Weight weight = _weights[i];
                 _ball.Transform.Scale = Vector3.One * weight.Force;
                 const float plankLength = 6;
                 float distance = plankLength * weight.Distance;
-                float radius = 0.6f * weight.Force;
+                float radius = pumpRad * weight.Force;
                 _ball.Transform.Rotation = Quaternion.FromEulerAngles(Vector3.UnitZ * distance / radius);
                 if (weight.Distance is > 1f or < -1f)
                 {
@@ -197,6 +201,14 @@ namespace LudumDare49
                 {
                     _ball.Transform.Position = -transform.Forward * distance + transform.Position + transform.Up * radius;
                 }
+                _ball.Render(_scene);
+            }
+
+            if (_timeForPumpkin < 2)
+            {
+                _ball.Transform.Rotation = Quaternion.Identity;
+                _ball.Transform.Scale = Vector3.One * _nextWeight.Force;
+                _ball.Transform.Position = transform.Position + Vector3.UnitY * (pumpRad + _timeForPumpkin);
                 _ball.Render(_scene);
             }
 
