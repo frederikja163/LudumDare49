@@ -41,6 +41,8 @@ namespace LudumDare49.OpenAL
 
             AL.Source(source, ALSourcei.Buffer, buffer);
             AL.Source(source, ALSourceb.Looping, true);
+            AL.Source(source, ALSourcef.Gain, 0.3f);
+            AL.Source(source, ALSourcef.Pitch, 1);
             AL.SourcePlay(source);
         }
 

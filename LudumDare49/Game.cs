@@ -13,7 +13,7 @@ namespace LudumDare49
 {
     public sealed class Game : IDisposable
     {
-        public const float DevScore = 125;
+        public const float DevScore = 193;
         
         private class Weight
         {
@@ -41,12 +41,14 @@ namespace LudumDare49
         private float _angularVelocity;
         private float _angle;
         private float _timeForPumpkin = 10;
-        private float _score = 0;
-        private float _highScore;
         private Random _random = new Random();
 
-        private bool _isGameOver = false;
-        
+        private bool _hasStarted = false;
+        private float _highScore;
+        private float _score = 0;
+        private float _gameOverTime = 0;
+        public bool IsGameOver { get; private set; } = false;
+
         private Weight Mouse => _weights[0];
 
         public Game(Window window)
@@ -89,16 +91,25 @@ namespace LudumDare49
 
         public void Update(float deltaT)
         {
-            if (!_isGameOver)
+            
+            if (!IsGameOver)
             {
-                _score += deltaT;
                 UpdateMouse();
+                if (!_hasStarted)
+                {
+                    return;
+                }
+                _score += deltaT;
                 
                 _timeForPumpkin -= deltaT;
                 if (_timeForPumpkin <= 0)
                 {
                     AddWeight();
                 }
+            }
+            else
+            {
+                _gameOverTime += deltaT;
             }
             
             UpdateWeights(deltaT);
@@ -114,7 +125,7 @@ namespace LudumDare49
                 weight.Distance -= _angle * deltaT * 1/weight.Force;
                 if (weight.Distance is > 0.95f or < -0.95f)
                 {
-                    _isGameOver = true;
+                    IsGameOver = true;
                     if (_score > _highScore)
                     {
                         _highScore = _score;
@@ -130,6 +141,7 @@ namespace LudumDare49
             {
                 float mouse = _window.MousePosition.X / _window.ClientSize.X * 2 - 1;
                 Mouse.Distance = mouse;
+                _hasStarted = true;
             }
             else
             {
@@ -193,17 +205,35 @@ namespace LudumDare49
             Text.Render(_highScore.ToString("highscore 000"), Sprite.WindowSize / 2 - new Vector2(275, 140), 0.4f);
             Text.Render(DevScore.ToString("devscore 000"), Sprite.WindowSize / 2 - new Vector2(260, 170), 0.4f);
 
-            if (_isGameOver)
+            if (!_hasStarted)
+            {
+                WriteCenteredText("press the plank to start", -Sprite.WindowSize.Y / 3, 1.2f);
+                WriteCenteredText("keep pumpkins on the plank to score points", -Sprite.WindowSize.Y / 3 + 200, 0.8f);
+                WriteCenteredText("push on the edges for a bigger effect", -Sprite.WindowSize.Y / 3 + 150, 0.8f);
+                WriteCenteredText("can you beat my score", -Sprite.WindowSize.Y / 3 + 100, 0.8f);
+            }
+            
+            if (IsGameOver)
             {
                 Text.Render("game over",  new Vector2(-2f * 39 * 4, Sprite.WindowSize.Y / 3), 2f);
                 if (_score > DevScore)
                 {
-                    Text.Render("but did you really lose",  new Vector2(-0.8f * 39 * 11.5f, Sprite.WindowSize.Y / 3 - 100), 0.8f);
-                    Text.Render("idk",  new Vector2(-0.8f * 39 * 1.5f, Sprite.WindowSize.Y / 3 - 150), 0.8f);
-                    Text.Render("you definitely beat me",  new Vector2(-0.8f * 39 * 11f, Sprite.WindowSize.Y / 3 - 200), 0.8f);
-                    Text.Render("good job",  new Vector2(-0.8f * 39 * 4f, Sprite.WindowSize.Y / 3 - 250), 0.8f);
+                    WriteCenteredText("but did you really lose",  Sprite.WindowSize.Y / 3 - 100, 0.8f);
+                    WriteCenteredText("idk",  Sprite.WindowSize.Y / 3 - 150, 0.8f);
+                    WriteCenteredText("you definitely beat me",  Sprite.WindowSize.Y / 3 - 200, 0.8f);
+                    WriteCenteredText("good job",  Sprite.WindowSize.Y / 3 - 250, 0.8f);
+                }
+
+                if ((int)_gameOverTime % 2 == 1)
+                {
+                    WriteCenteredText("press space to restart", -Sprite.WindowSize.Y / 3, 1.2f);
                 }
             }
+        }
+
+        private void WriteCenteredText(string text, float y, float size)
+        {
+            Text.Render(text, new Vector2(-size * 39 * text.Length / 2, y), size);
         }
 
         public void Dispose()

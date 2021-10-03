@@ -5,6 +5,7 @@ using OpenTK.Mathematics;
 using OpenTK.Windowing.Common;
 using OpenTK.Windowing.Common.Input;
 using OpenTK.Windowing.Desktop;
+using OpenTK.Windowing.GraphicsLibraryFramework;
 
 namespace LudumDare49
 {
@@ -45,6 +46,15 @@ namespace LudumDare49
             _game.Render();
             
             SwapBuffers();
+        }
+
+        protected override void OnKeyDown(KeyboardKeyEventArgs e)
+        {
+            base.OnKeyDown(e);
+            if (e.Key == Keys.Space && _game.IsGameOver)
+            {
+                _game = new Game(this);
+            }
         }
 
         protected override void OnUnload()
